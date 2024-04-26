@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAgent } from '../controllers/agentController.js';
+import { getAgent } from '../controllers/agent-controller.js';
 
 const router = express.Router();
 

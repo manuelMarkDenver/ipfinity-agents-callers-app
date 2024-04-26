@@ -1,8 +1,18 @@
-import express from 'express';
-import { getAgent } from '../controllers/agent-controller.js';
+import express from "express";
+import {
+  getAgent,
+  getAgents,
+  createAgent,
+  updateAgent,
+  deleteAgent,
+} from "../controllers/agent-controller.js";
+import mongoIdChecker from "../middleware/mongodb-id-checker.js";
 
 const router = express.Router();
 
-router.route("/").get(getAgent);
+router.param("agentId", mongoIdChecker);
 
-export default router
+router.route("/").get(getAgents).post(createAgent);
+router.route("/:agentId").get(getAgent).put(updateAgent).delete(deleteAgent);
+
+export default router;

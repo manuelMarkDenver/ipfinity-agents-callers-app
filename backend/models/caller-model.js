@@ -10,6 +10,21 @@ const CallerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    currentAgent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Agent",
+      default: null,
+    },
+    agentHistory: [
+      {
+        agent: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Agent",
+          default: null,
+        },
+        handledAt: { type: Date, default: null },
+      },
+    ],
   },
   {
     timestamps: true,

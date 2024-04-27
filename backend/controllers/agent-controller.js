@@ -1,12 +1,31 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
 import Agent from "../models/agent-model.js";
 
 // @desc Get list agents
-// @route GET /api/v1/agents/list
+// @route GET /api/v1/agents/
 // @access Public
 export const getAgents = asyncHandler(async (req, res) => {
-  const agents = await Agent.find();
+  const agents = await Agent.find()
+    .populate("currentCaller")
+    .populate("activeCall")
+    .exec();
+
+  if (!agents || agents.length === 0) {
+    res.status(200).json([]);
+  }
+
+  res.status(200).json(agents);
+});
+
+// @desc Get list agents
+// @route GET /api/v1/agents/available
+// @access Public
+export const getAvailableAgents = asyncHandler(async (req, res) => {
+  const agents = await Agent.find({ availableForCall: true })
+    .populate("currentCaller")
+    .populate("activeCall")
+    .exec();
 
   if (!agents || agents.length === 0) {
     res.status(200).json([]);

@@ -4,23 +4,48 @@ import QueueCallsModel from "../models/queue-calls-model.js";
 import AgentModel from "../models/agent-model.js";
 import CallerModel from "../models/caller-model.js";
 
-const callerHistoryChecker = (queueCallId, agentHistory) => {
-  let history = [];
+import CONSTANTS from "../constants/constants.json" assert { type: "json" };
 
-  const callerIdExist = agentHistory.includes(queueCallId);
+// const callerHistoryChecker = (queueCallId, agentHistory) => {
+//   let history = [];
 
-  if (callerIdExist) {
-    return (history = agentHistory);
-  }
+//   const callerIdExist = agentHistory.includes(queueCallId);
 
-  return [...agentHistory, queueCallId];
-};
+//   if (callerIdExist) {
+//     return (history = agentHistory);
+//   }
+
+//   console.log("histyr", [...agentHistory, queueCallId]);
+
+//   return [...agentHistory, queueCallId];
+// };
 
 // @desc Get all call from the queue
 // @route GET /api/v1/queue
 // @access Private
-export const getQueueCalls = asyncHandler(async (req, res) => {
-  const queueCalls = await QueueCalls.find();
+export const getAllQueueCalls = asyncHandler(async (req, res) => {
+  const queueCalls = await QueueCallsModel.find()
+    .populate({ path: "agentId" })
+    .populate({ path: "callerId" })
+    .exec();
+  if (!queueCalls || queueCalls.length === 0) {
+    res.status(200).json([]);
+  }
+
+  res.status(200).json(queueCalls);
+});
+
+// @desc Get all call from the queue
+// @route GET /api/v1/queue/active
+// @access Private
+export const getInQueueCalls = asyncHandler(async (req, res) => {
+  const queueCalls = await QueueCallsModel.find({ inQueue: true })
+    .populate({ path: "agentId" })
+    .populate({ path: "callerId" })
+    .exec();
+  if (!queueCalls || queueCalls.length === 0) {
+    res.status(200).json([]);
+  }
 
   res.status(200).json(queueCalls);
 });
@@ -33,6 +58,11 @@ export const getQueueCall = asyncHandler(async (req, res) => {
 
   const queueCall = await QueueCallsModel.findById(queueCallId);
 
+  if (!queueCall) {
+    res.status(200);
+    throw new Error(CONSTANTS.ERRORS.NOT_FOUND.QUEUE_CALL_NOT_FOUND);
+  }
+
   res.status(200).json(queueCall);
 });
 
@@ -41,20 +71,26 @@ export const getQueueCall = asyncHandler(async (req, res) => {
 // @access Private
 export const createQueueCall = asyncHandler(async (req, res) => {
   const { agentId, callerId } = req.body;
-
   if (agentId && !mongoose.Types.ObjectId.isValid(agentId)) {
     res.status(400);
-    throw new Error("Invalid ID");
+    throw new Error(CONSTANTS.ERRORS.NOT_VALID.INVALID_ID);
   }
 
   if (!mongoose.Types.ObjectId.isValid(callerId)) {
     res.status(400);
-    throw new Error("Invalid ID");
+    throw new Error(CONSTANTS.ERRORS.NOT_VALID.INVALID_ID);
   }
 
   if (!callerId) {
     res.status(400);
     throw new Error("Please provide caller id");
+  }
+
+  const caller = await CallerModel.findById(callerId);
+
+  if (!caller) {
+    res.status(404);
+    throw new Error(CONSTANTS.ERRORS.NOT_FOUND.CALLER_NOT_FOUND);
   }
 
   const queueCall = await QueueCallsModel.create({
@@ -63,11 +99,11 @@ export const createQueueCall = asyncHandler(async (req, res) => {
 
   if (!queueCall) {
     res.status(400);
-    throw new Error("Queue call not created");
+    throw new Error(CONSTANTS.ERRORS.QUEUE_CALL.QUEUE_CALL_NOT_CREATED);
   }
 
   res.status(201).json({
-    message: "Queue call created successfully",
+    message: CONSTANTS.CRUD.QUEUE_CALL.QUEUE_CALL_CREATED,
     data: queueCall,
   });
 });
@@ -98,14 +134,11 @@ export const updateQueueCall = asyncHandler(async (req, res) => {
       req.body.agentId !== undefined ? req.body.agentId : queueCall.agentId,
     callerId:
       req.body.callerId !== undefined ? req.body.callerId : queueCall.callerId,
-    callHandled:
-      req.body.callHandled !== undefined
-        ? req.body.callHandled
-        : queueCall.callHandled,
-    completed:
-      req.body.completed !== undefined
-        ? req.body.completed
-        : queueCall.completed,
+    inQueue:
+      req.body.inQueue !== undefined ? req.body.inQueue : queueCall.inQueue,
+    resolved:
+      req.body.resolved !== undefined ? req.body.resolved : queueCall.resolved,
+    notes: req.body.notes !== undefined ? req.body.notes : queueCall.notes,
     callStartTime:
       req.body.callStartTime !== undefined
         ? req.body.callStartTime
@@ -114,6 +147,10 @@ export const updateQueueCall = asyncHandler(async (req, res) => {
       req.body.callEndTime !== undefined
         ? req.body.callEndTime
         : queueCall.callEndTime,
+    agentsHandledHistory:
+      req.body.agentsHandledHistory !== undefined
+        ? req.body.agentsHandledHistory
+        : queueCall.agentsHandledHistory,
   };
 
   const updatedQueueCall = await QueueCallsModel.findByIdAndUpdate(
@@ -134,10 +171,12 @@ export const updateQueueCall = asyncHandler(async (req, res) => {
     data: {
       agentId: updatedQueueCall.agentId,
       callerId: updatedQueueCall.callerId,
-      callHandled: updatedQueueCall.callHandled,
-      completed: updatedQueueCall.completed,
+      inQueue: updatedQueueCall.inQueue,
+      resolved: updatedQueueCall.resolved,
+      notes: updatedQueueCall.notes,
       callStartTime: updatedQueueCall.callStartTime,
       callEndTime: updatedQueueCall.callEndTime,
+      agentsHandledHistory: updatedQueueCall.agentsHandledHistory,
     },
   });
 });
@@ -168,59 +207,82 @@ export const deleteQueueCall = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc Activate a call from the queue and assign it to an agent
+// @route PUT /api/v1/queue/:queueCallId?agentId=:agentId&callerId=:callerId
+// @access Private
 export const activateQueueCall = asyncHandler(async (req, res) => {
-  const { queueCallId, agentId, callerId } = req.params;
+  const { queueCallId } = req.params;
+  const { agentId } = req.query;
   const agent = await AgentModel.findById(agentId);
+
+  const queueCall = await QueueCallsModel.findOne({
+    _id: queueCallId,
+    inQueue: true,
+  });
+
+  if (!queueCall) {
+    res.status(400);
+    throw new Error(CONSTANTS.ERRORS.NOT_FOUND.QUEUE_CALL_NOT_FOUND);
+  }
 
   // Check if agent exists
   if (!agent) {
     res.status(404);
-    throw new Error("Agent not found");
+    throw new Error(CONSTANTS.ERRORS.NOT_FOUND.AGENT_NOT_FOUND);
   }
 
-  const caller = await CallerModel.findById(callerId);
+  const caller = await CallerModel.findById(queueCall?.callerId?._id);
   // Check if caller exists
   if (!caller) {
     res.status(404);
-    throw new Error("Caller not found");
+    throw new Error(CONSTANTS.ERRORS.CALLER_NOT_FOUND);
   }
 
   // If agent exist, check if agent is available for call
   if (!agent.availableForCall) {
     res.status(400);
-    throw new Error("Agent is not available for call");
+    throw new Error(CONSTANTS.ERRORS.AGENT.NOT_AVAILABLE_FOR_CALL);
   }
 
   const updatedAgent = await AgentModel.findByIdAndUpdate(
     agentId,
     {
       availableForCall: false,
+      currentCaller: queueCall?.callerId?._id,
       activeCall: queueCallId,
-      callerId: callerId,
-      callHistory: callerHistoryChecker(queueCallId, agent.callHistory),
+      callHistory: [
+        ...agent.callHistory,
+        {
+          callId: queueCallId,
+          callerId: queueCall?.callerId?._id,
+          handledAt: Date.now(),
+        },
+      ],
     },
     { new: true }
   );
 
   if (!updatedAgent) {
     res.status(400);
-    throw new Error("Failed to update agent");
-  }
-
-  const queueCall = await QueueCallsModel.findById(queueCallId);
-
-  if (!queueCall) {
-    res.status(400);
-    throw new Error("Queue call not found");
+    throw new Error(CONSTANTS.ERRORS.CRUD.AGENT.FAILED_UPDATE);
   }
 
   const updateData = {
     agentId: agentId !== undefined ? agentId : null,
     callerId: queueCall.callerId,
-    callHandled: true,
-    completed: queueCall.completed,
+    inQueue: false,
+    resolved: queueCall.resolved,
     callStartTime: Date.now(),
     callEndTime: queueCall.callEndTime,
+    agentsHandledHistory: [
+      ...queueCall.agentsHandledHistory,
+      {
+        callId: queueCallId,
+        agentId: agentId,
+        callerId: queueCall?.callerId?._id,
+        handledAt: Date.now(),
+      },
+    ],
   };
 
   const updatedQueueCall = await QueueCallsModel.findByIdAndUpdate(
@@ -231,23 +293,29 @@ export const activateQueueCall = asyncHandler(async (req, res) => {
 
   if (!updatedQueueCall) {
     res.status(400);
-    throw new Error("Failed to update queue call");
+    throw new Error(CONSTANTS.ERRORS.CRUD.QUEUE_CALL.FAILED_UPDATE);
   }
 
-  res.status(200).json(updatedQueueCall);
+  res.status(200).json({
+    message: CONSTANTS.CRUD.QUEUE_CALL.QUEUE_CALLS_ASSIGNED_OK,
+  });
 });
 
-export const completeQueueCall = asyncHandler(async (req, res) => {
+// @desc Complete a call
+// @route PUT /api/v1/queue/:queueCallId
+// @access Private
+export const endCall = asyncHandler(async (req, res) => {
   const { queueCallId } = req.params;
 
   const queueCall = await QueueCallsModel.findById(queueCallId);
   if (!queueCall) {
     res.status(404);
-    throw new Error("Queue call not found");
+    throw new Error(CONSTANTS.ERRORS.NOT_FOUND.QUEUE_CALL_NOT_FOUND);
   }
 
   const updateData = {
-    completed: true,
+    resolved: true,
+    inQueue: false,
     callEndTime: Date.now(),
   };
 
@@ -259,8 +327,31 @@ export const completeQueueCall = asyncHandler(async (req, res) => {
 
   if (!updatedQueueCall) {
     res.status(400);
-    throw new Error("Failed to update queue call");
+    throw new Error(CONSTANTS.ERRORS.CRUD.QUEUE_CALL.FAILED_UPDATE);
   }
 
-  res.status(200).json(updatedQueueCall);
+  // Updating agent
+  const agent = await AgentModel.findById(queueCall.agentId);
+
+  if (!agent) {
+    res.status(404);
+    throw new Error(CONSTANTS.ERRORS.NOT_FOUND.AGENT_NOT_FOUND);
+  }
+
+  const updatedAgent = await AgentModel.findByIdAndUpdate(
+    queueCall.agentId,
+    {
+      availableForCall: true,
+      currentCaller: null,
+      activeCall: null,
+    },
+    { new: true }
+  );
+
+  if (!updatedAgent) {
+    res.status(400);
+    throw new Error(CONSTANTS.ERRORS.CRUD.AGENT.FAILED_UPDATE);
+  }
+
+  res.status(200).json({ message: "Call completed successfully" });
 });

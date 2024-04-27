@@ -1,0 +1,54 @@
+{
+  "ERRORS": {
+    "NOT_FOUND": {
+      "NOT_FOUND": "Not found",
+      "CALLER_NOT_FOUND": "Caller not found",
+      "AGENT_NOT_FOUND": "Agent not found",
+      "QUEUE_CALL_NOT_FOUND": "Queue call not found"
+    },
+    "NOT_VALID": {
+      "INVALID_ID": "Invalid ID",
+      "CALLER_ID_NOT_VALID": "Caller ID not valid",
+      "AGENT_ID_NOT_VALID": "Agent ID not valid",
+      "QUEUE_CALL_ID_NOT_VALID": "Queue call ID not valid"
+    },
+    "QUEUE_CALL": {
+      "QUEUE_CALL_NOT_CREATED": "Failed to create a queue call"
+    },
+    "AGENT": {
+      "NOT_AVAILABLE_FOR_CALL": "Agent is not available for call"
+    },
+    "CRUD": {
+      "AGENT": {
+        "FAILED_UPDATE": "Failed to update agent"
+      },
+      "CALLER": {
+        "FAILED_CREATE": "Failed to create caller"
+      },
+      "QUEUE_CALL": {
+        "FAILED_UPDATE": "Failed to update call"
+      }
+    }
+  },
+  "CRUD": {
+    "QUEUE_CALL": {
+      "QUEUE_CALL_CREATED": "Queue call created successfully",
+      "QUEUE_CALL_RETRIEVED": "Queue call retrieved successfully",
+      "QUEUE_CALL_DELETED": "Queue call deleted successfully",
+      "QUEUE_CALL_UPDATED": "Queue call updated successfully",
+      "QUEUE_CALLS_ASSIGNED_OK": "Call successfully assigned to an agent"
+    },
+    "CALLER_AND_QUEUE_CALL": {
+      "CALLER_AND_QUEUE_CALL_CREATED": "Caller and queue call created successfully",
+      "CALLER_AND_QUEUE_CALL_RETRIEVED": "Caller and queue call retrieved successfully",
+      "CALLER_AND_QUEUE_CALL_DELETED": "Caller and queue call deleted successfully",
+      "CALLER_AND_QUEUE_CALL_UPDATED": "Caller and queue call updated successfully"
+    },
+    "QUEUE_CALLS": {
+      "QUEUE_CALLS_CREATED": "Queue calls created successfully",
+      "QUEUE_CALLS_RETRIEVED": "Queue calls retrieved successfully",
+      "QUEUE_CALLS_DELETED": "Queue calls deleted successfully",
+      "QUEUE_CALLS_UPDATED": "Queue calls updated successfully"
+    }
+  }
+}

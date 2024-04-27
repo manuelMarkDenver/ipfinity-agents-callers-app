@@ -15,15 +15,31 @@ const AgentSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    activeCall: {
+    currentCaller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Caller",
       default: null,
     },
-    callHistory: {
-      type: Array,
-      default: [],
+    activeCall: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QueueCalls",
+      default: null,
     },
+    callHistory: [
+      {
+        callId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "QueueCalls",
+          default: null,
+        },
+        callerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Caller",
+          default: null,
+        },
+        handledAt: { type: Date, default: null },
+      },
+    ],
   },
   {
     timestamps: true,

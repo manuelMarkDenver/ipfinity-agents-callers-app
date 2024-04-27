@@ -1,12 +1,13 @@
 import express from "express";
 import {
-  getQueueCalls,
+  getAllQueueCalls,
+  getInQueueCalls,
   getQueueCall,
   createQueueCall,
   updateQueueCall,
   deleteQueueCall,
   activateQueueCall,
-  completeQueueCall,
+  endCall,
 } from "../controllers/calls-queue.controller.js";
 
 import mongoIdChecker from "../middleware/mongodb-id-checker.js";
@@ -17,16 +18,13 @@ router.param("queueCallId", mongoIdChecker);
 router.param("agentId", mongoIdChecker);
 router.param("callerId", mongoIdChecker);
 
-router.route("/").get(getQueueCalls).post(createQueueCall);
+router.route("/").get(getAllQueueCalls).post(createQueueCall);
+router.route("/inqueue").get(getInQueueCalls);
 router.route("/:queueCallId").get(getQueueCall);
+router.put("/:queueCallId/activateQueueCall", activateQueueCall);
 router.put("/:queueCallId", updateQueueCall);
 router.delete("/:queueCallId", deleteQueueCall);
 
-router.put(
-  "/:queueCallId/:agentId/:callerId/activateQueueCall",
-  activateQueueCall
-);
-
-router.put("/:queueCallId/completeQueueCall", completeQueueCall);
+router.put("/:queueCallId/endCall", endCall);
 
 export default router;

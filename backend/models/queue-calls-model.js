@@ -11,16 +11,20 @@ const QueueCallsSchema = new mongoose.Schema(
     callerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Caller",
-      required: false,
+      required: true,
     },
-    callHandled: {
+    inQueue: {
+      type: Boolean,
+      default: true,
+    },
+    resolved: {
       type: Boolean,
       default: false,
       required: false,
     },
-    completed: {
-      type: Boolean,
-      default: false,
+    notes: {
+      type: String,
+      default: "",
       required: false,
     },
     callStartTime: {
@@ -33,10 +37,26 @@ const QueueCallsSchema = new mongoose.Schema(
       default: null,
       required: false,
     },
-    agentsHandledHistory: {
-      type: Array,
-      default: [],
-    },
+    agentsHandledHistory: [
+      {
+        callId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "QueueCalls",
+          default: null,
+        },
+        agentId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Agent",
+          default: null,
+        },
+        callerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Caller",
+          default: null,
+        },
+        handledAt: { type: Date, default: null },
+      },
+    ],
   },
   {
     timestamps: true,

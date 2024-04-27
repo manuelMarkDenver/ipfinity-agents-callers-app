@@ -1,6 +1,9 @@
 import asyncHandler from "express-async-handler";
 import Caller from "../models/caller-model.js";
 
+import CONSTANTS from "../constants/constants.json" assert { type: "json" };
+import QueueCallsModel from "../models/queue-calls-model.js";
+
 // @desc get callers
 // @route GET /api/v1/callers/
 // @access Private
@@ -46,10 +49,20 @@ export const createCaller = asyncHandler(async (req, res) => {
     name,
     phoneNumber,
   });
-
-  if (caller) {
-    res.status(201).json({ message: "Caller created", data: { caller } });
+  if (!caller) {
+    res.status(400);
+    throw new Error(CONSTANTS.ERRORS.CRUD.CALLER.FAILED_CREATE);
   }
+
+  const queueCall = await QueueCallsModel.create({ callerId: caller?._id });
+  if (!queueCall) {
+    res.status(400);
+    throw new Error(CONSTANTS.ERRORS.QUEUE_CALL.QUEUE_CALL_NOT_CREATED);
+  }
+
+  res.status(201).json({
+    message: CONSTANTS.CRUD.CALLER_AND_QUEUE_CALL.CALLER_AND_QUEUE_CALL_CREATED,
+  });
 });
 
 // @desc update a caller

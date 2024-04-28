@@ -14,9 +14,9 @@ import mongoIdChecker from "../middleware/mongodb-id-checker.js";
 
 const router = express.Router();
 
-router.param("queueCallId", mongoIdChecker);
-router.param("agentId", mongoIdChecker);
-router.param("callerId", mongoIdChecker);
+// router.param("queueCallId", mongoIdChecker);
+// router.param("agentId", mongoIdChecker);
+// router.param("callerId", mongoIdChecker);
 
 router.route("/").get(getAllQueueCalls).post(createQueueCall);
 router.route("/inqueue").get(getInQueueCalls);

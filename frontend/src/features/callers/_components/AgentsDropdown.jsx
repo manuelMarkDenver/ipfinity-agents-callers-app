@@ -4,26 +4,40 @@ import { Dropdown } from "react-bootstrap";
 import useAgentsStore from "../../../stores/agentStore";
 import LoadingSpinner from "../../../components/screens/Spinners";
 import useQueueCallsStore from "../../../stores/queueCallStore";
+import { useToast } from "../../../../hooks/useToast";
 
 const AgentsDropdown = ({ inQueueCall }) => {
-  const { availableAgents, isLoading, fetchData: fetchAllAgents,fetchAvailableAgents } =
-    useAgentsStore();
+  const {
+    availableAgents,
+    isLoading,
+    fetchData: fetchAllAgents,
+    fetchAvailableAgents,
+  } = useAgentsStore();
   const { startCall, fetchAllInqueueCalls } = useQueueCallsStore();
 
-  const handleClick = (agentId, inQueueCall) => {
-    startCall(inQueueCall?._id, agentId);
-    fetchAvailableAgents();
-    fetchAllInqueueCalls();
-    fetchAllAgents();
+  const { showToastMessage } = useToast();
+
+  const handleClick = async (agentId, inQueueCall) => {
+    try {
+      const response = await startCall(inQueueCall?._id, agentId);
+      await fetchAvailableAgents();
+      await fetchAllInqueueCalls();
+      await fetchAllAgents();
+
+      showToastMessage(response.message, "success");
+    } catch (err) {
+      console.error(err);
+      showToastMessage(err.message, "error");
+    }
   };
 
   return (
     <Dropdown size="sm">
       <Dropdown.Toggle
         variant="success"
-        className='flex justify-center align-middle'
+        className="flex justify-center align-middle"
         size="sm"
-        disabled={availableAgents.length === 0 ? true : false}
+        disabled={isLoading || availableAgents.length === 0 ? true : false}
       >
         {isLoading && <LoadingSpinner />}
         {availableAgents.length === 0 ? "No Available Agents" : "Agents"}

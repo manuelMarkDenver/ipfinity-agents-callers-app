@@ -10,7 +10,7 @@ import mongoIdChecker from "../middleware/mongodb-id-checker.js";
 
 const router = express.Router();
 
-router.param("callerId", mongoIdChecker);
+// router.param("callerId", mongoIdChecker);
 
 router.route("/").get(getCallers).post(createCaller);
 router.route("/:callerId").get(getCaller);

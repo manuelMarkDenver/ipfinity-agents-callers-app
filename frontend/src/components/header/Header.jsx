@@ -7,7 +7,7 @@ function BasicExample() {
   return (
     <Navbar expand="lg" bg="dark" variant="dark">
       <Container>
-        <Navbar.Brand href="#home">IPFinity Switchboard</Navbar.Brand>
+        <Navbar.Brand href="#home">IPFinity Calls Queue</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">

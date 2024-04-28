@@ -4,58 +4,87 @@ import CallersContainer from "../../../features/callers/CallersContainer";
 import useCallersStore from "../../../stores/callerStore";
 import useQueueCallsStore from "../../../stores/queueCallStore";
 import useAgentsStore from "../../../stores/agentStore";
+import { ToastContainer } from "react-toastify";
+import { useToast } from "../../../../hooks/useToast";
 
 const HomeScreen = () => {
   const { createRandomCaller } = useCallersStore();
-  const { fetchData, fetchAvailableAgents, createRandomAgent } = useAgentsStore();
+  const { isLoading, fetchData, fetchAvailableAgents, createRandomAgent } =
+    useAgentsStore();
   const { fetchAllInqueueCalls } = useQueueCallsStore();
 
+  const { showToastMessage } = useToast();
+
   const handleClickCreateAgent = async () => {
-    await createRandomAgent();
-    await fetchData();
-    await fetchAvailableAgents();
-    await fetchAllInqueueCalls();
+    try {
+      const response = await createRandomAgent();
+      await fetchData();
+      await fetchAvailableAgents();
+      await fetchAllInqueueCalls();
+      showToastMessage(response.message, "success");
+    } catch (err) {
+      console.err(err.message);
+      showToastMessage(err.message, "error");
+    }
   };
 
   const handleClickCreateCaller = async () => {
-    await createRandomCaller();
-    await fetchAvailableAgents();
-    await fetchAllInqueueCalls();
+    try {
+      const response = await createRandomCaller();
+      await fetchAvailableAgents();
+      await fetchAllInqueueCalls();
+      showToastMessage(response.message, "success");
+    } catch (err) {
+      console.err(err.message);
+      showToastMessage(err.message, "error");
+    }
   };
 
   return (
     <Container>
+      <ToastContainer />
       <Row>
-        <Col>
-          <h1 className="text-center text-red-600">Home</h1>
+        <Col sm={12}>
+          <h1 className="text-center text-slate-600 mb-10">Dashboard</h1>
         </Col>
       </Row>
+
       <Row>
-        <Col>
-          <h2 className="text-center text-cyan-600">Queue</h2>
-        </Col>
-      </Row>
-      <Row className="mb-3">
-        <Col className="flex justify-center">
-          <Button variant="outline-success" onClick={handleClickCreateAgent}>
-            Create Random Agent
-          </Button>
-        </Col>
-        <Col className="flex justify-center">
-          <Button variant="outline-info" onClick={handleClickCreateCaller}>
-            Create Random Caller
-          </Button>
-        </Col>
-      </Row>
-      <Row className="gap-3">
-        <Col>
+        <Col sm={12} md={6} className="mb-4 md:mb-0">
           <Row>
-            <AgentsContainer />
+            <Col className="flex justify-center mb-3">
+              <Button
+                variant="success"
+                onClick={handleClickCreateAgent}
+                disabled={isLoading}
+              >
+                Create Agent
+              </Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <AgentsContainer />
+            </Col>
           </Row>
         </Col>
-        <Col>
+
+        <Col sm={12} md={6}>
           <Row>
-            <CallersContainer />
+            <Col className="flex justify-center mb-3">
+              <Button
+                variant="success"
+                onClick={handleClickCreateCaller}
+                disabled={isLoading}
+              >
+                Create Caller
+              </Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <CallersContainer />
+            </Col>
           </Row>
         </Col>
       </Row>

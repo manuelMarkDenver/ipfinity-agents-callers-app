@@ -11,7 +11,7 @@ import mongoIdChecker from "../middleware/mongodb-id-checker.js";
 
 const router = express.Router();
 
-router.param("agentId", mongoIdChecker);
+// router.param("agentId", mongoIdChecker);
 
 router.route("/").get(getAgents).post(createAgent);
 router.get("/available", getAvailableAgents);

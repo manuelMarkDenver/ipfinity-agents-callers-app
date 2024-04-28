@@ -1,12 +1,13 @@
 import PropTypes from "prop-types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleChevronRight } from "@fortawesome/free-solid-svg-icons";
 
-import { Button, Stack } from "react-bootstrap";
+import { Stack, Badge } from "react-bootstrap";
 import useQueueCallsStore from "../../stores/queueCallStore";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faX, faCheck, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 import CustomButton from "../../components/CustomButton";
 import useAgentsStore from "../../stores/agentStore";
+import { useToast } from "../../../hooks/useToast";
 
 const Agent = ({ agent }) => {
   const { activeCall, name, availableForCall, currentCaller } = agent;
@@ -15,30 +16,57 @@ const Agent = ({ agent }) => {
 
   const { endCall } = useQueueCallsStore();
 
+  const { showToastMessage } = useToast();
+
   const handleEndCallClick = async () => {
-    await endCall(activeCall._id);
-    await fetchData();
-    await fetchAvailableAgents();
+    let response = null;
+
+    try {
+      response = await endCall(activeCall._id);
+      await fetchData();
+      await fetchAvailableAgents();
+      showToastMessage(response.message, "success");
+    } catch (err) {
+      console.err(err);
+      showToastMessage(err.message, "error");
+    }
   };
 
   return (
     <Stack
       direction="horizontal"
       className={`${
-        availableForCall ? "bg-green-400" : "bg-red-400"
-      }  p-1 text-center`}
+        availableForCall ? "bg-green-400" : "bg-red-200"
+      }  p-1 text-center flex justify-center items-center`}
     >
-      <p className="m-0">
-        {name}
-        {availableForCall ? "Avail" : ` -> ${currentCaller?.phoneNumber}`}
-      </p>
+      <span className="mr-2">
+        {!availableForCall ? (
+          <FontAwesomeIcon icon={faX} color="red" />
+        ) : (
+          <FontAwesomeIcon icon={faCheck} color="green" />
+        )}
+      </span>
+
+      <div>
+        {name}{" "}
+        {availableForCall ? (
+          <Badge bg="success">Avail</Badge>
+        ) : (
+          <span>
+            <FontAwesomeIcon icon={faArrowRight} /> {currentCaller?.name} /{" "}
+            {currentCaller?.phoneNumber}
+          </span>
+        )}
+      </div>
+
       <div className="ms-auto flex gap-1">
         {!availableForCall && (
-          <CustomButton title="End Call" func={handleEndCallClick} />
+          <CustomButton
+            title="End Call"
+            func={handleEndCallClick}
+            variant="danger"
+          />
         )}
-        {/* <Button variant="primary" className="mr-2">
-          <FontAwesomeIcon icon={faCircleChevronRight} />
-        </Button> */}
       </div>
     </Stack>
   );

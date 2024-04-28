@@ -2,7 +2,7 @@ import axios from "axios";
 import { create } from "zustand";
 import { faker } from "@faker-js/faker";
 
-const useAgentsStore = create((set) => ({
+const useAgentsStore = create((set, get) => ({
   data: [],
   availableAgents: [],
   isLoading: false,
@@ -31,13 +31,17 @@ const useAgentsStore = create((set) => ({
   },
 
   createRandomAgent: async () => {
+    let response = null;
+
     const fakeAgent = {
       name: faker.person.fullName(),
       email: faker.internet.email(),
     };
 
     try {
-      const response = await axios.post("/api/v1/agents/", fakeAgent);
+      response = await axios.post("/api/v1/agents/", fakeAgent);
+
+      set({ data: [...get().data, response.data], error: null, isLoading: false });
 
       return response.data;
     } catch (err) {
@@ -46,14 +50,24 @@ const useAgentsStore = create((set) => ({
   },
 }));
 
-axios.get("/api/v1/agents").then((response) => {
-  useAgentsStore.setState({ data: response.data });
-  useAgentsStore.setState({ isLoading: false, error: null });
-});
+axios
+  .get("/api/v1/agents")
+  .then((response) => {
+    useAgentsStore.setState({ data: response.data });
+    useAgentsStore.setState({ isLoading: false, error: null });
+  })
+  .catch((err) => {
+    useAgentsStore.setState({ error: err.message, isLoading: false });
+  });
 
-axios.get("/api/v1/agents/available").then((response) => {
-  useAgentsStore.setState({ availableAgents: response.data });
-  useAgentsStore.setState({ isLoading: false, error: null });
-});
+axios
+  .get("/api/v1/agents/available")
+  .then((response) => {
+    useAgentsStore.setState({ availableAgents: response.data });
+    useAgentsStore.setState({ isLoading: false, error: null });
+  })
+  .catch((err) => {
+    useAgentsStore.setState({ error: err.message, isLoading: false });
+  });
 
 export default useAgentsStore;

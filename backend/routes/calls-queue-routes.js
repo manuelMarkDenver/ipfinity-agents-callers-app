@@ -21,7 +21,7 @@ const router = express.Router();
 router.route("/").get(getAllQueueCalls).post(createQueueCall);
 router.route("/inqueue").get(getInQueueCalls);
 router.route("/:queueCallId").get(getQueueCall);
-router.put("/:queueCallId/activateQueueCall", activateQueueCall);
+router.put("/:queueCallId/activateQueueCall?:agentId", activateQueueCall);
 router.put("/:queueCallId", updateQueueCall);
 router.delete("/:queueCallId", deleteQueueCall);
 

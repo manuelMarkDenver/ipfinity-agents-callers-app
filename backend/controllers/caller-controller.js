@@ -49,12 +49,15 @@ export const createCaller = asyncHandler(async (req, res) => {
     name,
     phoneNumber,
   });
+  console.log("🚀 ~ createCaller ~ caller:", caller);
+
   if (!caller) {
     res.status(400);
     throw new Error(CONSTANTS.ERRORS.CRUD.CALLER.FAILED_CREATE);
   }
 
   const queueCall = await QueueCallsModel.create({ callerId: caller?._id });
+
   if (!queueCall) {
     res.status(400);
     throw new Error(CONSTANTS.ERRORS.QUEUE_CALL.QUEUE_CALL_NOT_CREATED);
@@ -62,6 +65,8 @@ export const createCaller = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     message: CONSTANTS.CRUD.CALLER_AND_QUEUE_CALL.CALLER_AND_QUEUE_CALL_CREATED,
+    caller,
+    queueCall,
   });
 });
 
@@ -111,12 +116,18 @@ export const updateCaller = asyncHandler(async (req, res) => {
 // @access Private
 export const deleteCaller = asyncHandler(async (req, res) => {
   const { callerId } = req.params;
+  console.log("🚀 ~ deleteCaller ~ callerId:", callerId);
+
+  if (!callerId) {
+    res.status(400);
+    throw new Error("Please provide caller id");
+  }
 
   const caller = await Caller.findByIdAndDelete(callerId);
 
   if (!caller) {
     res.status(404);
-    throw new Error("Caller not found");
+    throw new Error("Error deleting caller");
   }
 
   res.status(200).json({ message: "Caller deleted", data: { caller } });

@@ -6,7 +6,6 @@ import {
   updateCaller,
   deleteCaller,
 } from "../controllers/caller-controller.js";
-import mongoIdChecker from "../middleware/mongodb-id-checker.js";
 
 const router = express.Router();
 

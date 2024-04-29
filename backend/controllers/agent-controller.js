@@ -75,19 +75,16 @@ export const createAgent = async (req, res) => {
     email,
   });
 
-  if (agent) {
-    res.status(201).json({
-      message: "Agent successfully created",
-      data: {
-        name,
-        email,
-      },
-    });
-  } else {
+  if (!agent) {
     res.status(400).json({
       message: "Failed to create agent",
     });
   }
+
+  res.status(201).json({
+    message: "Agent successfully created",
+    agent,
+  });
 };
 
 // @desc Update agent
@@ -141,5 +138,5 @@ export const deleteAgent = asyncHandler(async (req, res) => {
     throw new Error("Agent not found");
   }
 
-  res.status(200).json(deletedAgent);
+  res.status(200).json({ message: "Agent successfully deleted", deletedAgent });
 });

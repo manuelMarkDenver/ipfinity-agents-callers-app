@@ -214,11 +214,15 @@ export const activateQueueCall = asyncHandler(async (req, res) => {
   const { queueCallId } = req.params;
   const { agentId } = req.query;
   const agent = await AgentModel.findById(agentId);
+  console.log("🚀 ~ activateQueueCall ~ agent:", agent);
 
   const queueCall = await QueueCallsModel.findOne({
     _id: queueCallId,
     inQueue: true,
-  });
+  })
+    .populate("callerId")
+    .populate("agentId")
+    .exec();
 
   if (!queueCall) {
     res.status(400);
@@ -298,6 +302,8 @@ export const activateQueueCall = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     message: CONSTANTS.CRUD.QUEUE_CALL.QUEUE_CALLS_ASSIGNED_OK,
+    agent: updatedAgent,
+    queue: updatedQueueCall,
   });
 });
 
@@ -353,5 +359,9 @@ export const endCall = asyncHandler(async (req, res) => {
     throw new Error(CONSTANTS.ERRORS.CRUD.AGENT.FAILED_UPDATE);
   }
 
-  res.status(200).json({ message: "Call completed successfully" });
+  res.status(200).json({
+    message: "Call completed successfully",
+    agent: updatedAgent,
+    queue: updatedQueueCall,
+  });
 });

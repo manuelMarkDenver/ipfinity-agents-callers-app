@@ -1,26 +1,19 @@
 import { Container, Row, Col, Button } from "react-bootstrap/";
 import AgentsContainer from "../../../features/agents/AgentsContainer";
 import CallersContainer from "../../../features/callers/CallersContainer";
-import useCallersStore from "../../../stores/callerStore";
-import useQueueCallsStore from "../../../stores/queueCallStore";
-import useAgentsStore from "../../../stores/agentStore";
 import { ToastContainer } from "react-toastify";
 import { useToast } from "../../../../hooks/useToast";
+import { useBoundStore } from "../../../stores/useBoundStore";
 
 const HomeScreen = () => {
-  const { createRandomCaller } = useCallersStore();
-  const { isLoading, fetchData, fetchAvailableAgents, createRandomAgent } =
-    useAgentsStore();
-  const { fetchAllInqueueCalls } = useQueueCallsStore();
+  const { createCallerAndQueueCall } = useBoundStore();
+  const { isLoading, createRandomAgent } = useBoundStore();
 
   const { showToastMessage } = useToast();
 
   const handleClickCreateAgent = async () => {
     try {
       const response = await createRandomAgent();
-      await fetchData();
-      await fetchAvailableAgents();
-      await fetchAllInqueueCalls();
       showToastMessage(response.message, "success");
     } catch (err) {
       console.err(err.message);
@@ -30,9 +23,7 @@ const HomeScreen = () => {
 
   const handleClickCreateCaller = async () => {
     try {
-      const response = await createRandomCaller();
-      await fetchAvailableAgents();
-      await fetchAllInqueueCalls();
+      const response = await createCallerAndQueueCall();
       showToastMessage(response.message, "success");
     } catch (err) {
       console.err(err.message);
@@ -45,7 +36,7 @@ const HomeScreen = () => {
       <ToastContainer />
       <Row>
         <Col sm={12}>
-          <h1 className="text-center text-slate-600 mb-10">Dashboard</h1>
+          <h1 className="text-center text-slate-600 my-10">Dashboard</h1>
         </Col>
       </Row>
 

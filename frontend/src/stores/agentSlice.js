@@ -1,19 +1,18 @@
 import axios from "axios";
-import { create } from "zustand";
 import { faker } from "@faker-js/faker";
 
-const useAgentsStore = create((set, get) => ({
-  data: [],
+export const createAgentSlice = (set, get) => ({
+  agents: [],
   availableAgents: [],
-  isLoading: false,
-  error: null,
+  isAgentsLoading: false,
+  agentsError: null,
 
-  fetchData: async () => {
+  fetchAgentsData: async () => {
     set({ isLoading: true });
 
     try {
       const response = await axios.get("/api/v1/agents");
-      set({ data: response.data, isLoading: false, error: null });
+      set({ agents: response.data, isLoading: false, error: null });
     } catch (err) {
       set({ error: err.message, isLoading: false });
     }
@@ -41,33 +40,31 @@ const useAgentsStore = create((set, get) => ({
     try {
       response = await axios.post("/api/v1/agents/", fakeAgent);
 
-      set({ data: [...get().data, response.data], error: null, isLoading: false });
+      set({
+        agents: [...get().agents, response.data.agent],
+        isAgentsLoading: false,
+        agentsError: null,
+      });
 
       return response.data;
     } catch (err) {
       set({ error: err.message, isLoading: false });
     }
   },
-}));
 
-axios
-  .get("/api/v1/agents")
-  .then((response) => {
-    useAgentsStore.setState({ data: response.data });
-    useAgentsStore.setState({ isLoading: false, error: null });
-  })
-  .catch((err) => {
-    useAgentsStore.setState({ error: err.message, isLoading: false });
-  });
+  deleteAgent: async (agentId) => {
+    try {
+      const response = await axios.delete(`/api/v1/agents/${agentId}`);
 
-axios
-  .get("/api/v1/agents/available")
-  .then((response) => {
-    useAgentsStore.setState({ availableAgents: response.data });
-    useAgentsStore.setState({ isLoading: false, error: null });
-  })
-  .catch((err) => {
-    useAgentsStore.setState({ error: err.message, isLoading: false });
-  });
+      set({
+        agents: get().agents.filter((agent) => agent._id !== agentId),
+        error: null,
+        isLoading: false,
+      });
 
-export default useAgentsStore;
+      return response.data;
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
+});

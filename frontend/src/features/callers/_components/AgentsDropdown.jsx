@@ -1,45 +1,47 @@
 import PropTypes from "prop-types";
 
 import { Dropdown } from "react-bootstrap";
-import useAgentsStore from "../../../stores/agentStore";
 import LoadingSpinner from "../../../components/screens/Spinners";
-import useQueueCallsStore from "../../../stores/queueCallStore";
 import { useToast } from "../../../../hooks/useToast";
+import { useBoundStore } from "../../../stores/useBoundStore";
 
 const AgentsDropdown = ({ inQueueCall }) => {
+  const agents = useBoundStore((state) => state.agents);
+  const availableAgents = agents.filter((agent) => agent.availableForCall);
   const {
-    availableAgents,
-    isLoading,
-    fetchData: fetchAllAgents,
-    fetchAvailableAgents,
-  } = useAgentsStore();
-  const { startCall, fetchAllInqueueCalls } = useQueueCallsStore();
+    fetchAgentsData,
+    fetchQueueCallsData,
+    startCall,
+    isAllQueueCallsLoading,
+  } = useBoundStore();
 
   const { showToastMessage } = useToast();
 
   const handleClick = async (agentId, inQueueCall) => {
     try {
       const response = await startCall(inQueueCall?._id, agentId);
-      await fetchAvailableAgents();
-      await fetchAllInqueueCalls();
-      await fetchAllAgents();
 
-      showToastMessage(response.message, "success");
+      await fetchAgentsData();
+      await fetchQueueCallsData();
+
+      showToastMessage(response?.message, "success");
     } catch (err) {
       console.error(err);
-      showToastMessage(err.message, "error");
+      showToastMessage(err?.message, "error");
     }
   };
 
   return (
     <Dropdown size="sm">
       <Dropdown.Toggle
-        variant="success"
+        variant="primary"
         className="flex justify-center align-middle"
         size="sm"
-        disabled={isLoading || availableAgents.length === 0 ? true : false}
+        disabled={
+          isAllQueueCallsLoading || availableAgents.length === 0 ? true : false
+        }
       >
-        {isLoading && <LoadingSpinner />}
+        {isAllQueueCallsLoading && <LoadingSpinner />}
         {availableAgents.length === 0 ? "No Available Agents" : "Agents"}
       </Dropdown.Toggle>
       <Dropdown.Menu>

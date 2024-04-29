@@ -1,10 +1,12 @@
 import { Card, ListGroup } from "react-bootstrap";
 import Caller from "./Caller";
 import LoadingSpinner from "../../components/screens/Spinners";
-import useQueueCallsStore from "../../stores/queueCallStore";
+import { useBoundStore } from "../../stores/useBoundStore";
 
 const CallersContainer = () => {
-  const { inQueueCalls: callers, isLoading, error } = useQueueCallsStore();
+  const queue = useBoundStore((state) => state.allQueueCalls);
+  const filteredQueue = queue?.filter((queue) => queue.inQueue === true);
+  const { isCallersLoading: isLoading, callerError: error } = useBoundStore();
 
   if (isLoading) {
     return (
@@ -21,12 +23,12 @@ const CallersContainer = () => {
     return <p>{error}</p>;
   }
 
-  if (!callers || callers?.length === 0) {
+  if (!filteredQueue || filteredQueue?.length === 0) {
     return (
       <Card className="p-0">
         <Card.Header className="text-center font-bold">Callers</Card.Header>
         <ListGroup variant="flush">
-          <p className="text-center">No Callers</p>
+          <p className="text-center">No callers in queue</p>
         </ListGroup>
       </Card>
     );
@@ -36,10 +38,10 @@ const CallersContainer = () => {
     <Card className="p-0">
       <Card.Header className="text-center font-bold">Queue</Card.Header>
       <ListGroup variant="flush">
-        {callers &&
-          callers.map((caller) => (
-            <ListGroup.Item className="p-0" key={caller._id}>
-              <Caller caller={caller} />
+        {filteredQueue &&
+          filteredQueue.map((queue, index) => (
+            <ListGroup.Item className="p-0" key={index}>
+              <Caller caller={queue} />
             </ListGroup.Item>
           ))}
       </ListGroup>

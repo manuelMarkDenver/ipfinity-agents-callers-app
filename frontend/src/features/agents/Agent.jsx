@@ -1,20 +1,17 @@
 import PropTypes from "prop-types";
 
-import { Stack, Badge } from "react-bootstrap";
-import useQueueCallsStore from "../../stores/queueCallStore";
+import { Stack, Badge, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faX, faCheck, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 import CustomButton from "../../components/CustomButton";
-import useAgentsStore from "../../stores/agentStore";
 import { useToast } from "../../../hooks/useToast";
+import { useBoundStore } from "../../stores/useBoundStore";
 
 const Agent = ({ agent }) => {
-  const { activeCall, name, availableForCall, currentCaller } = agent;
+  const { _id: id, activeCall, name, availableForCall, currentCaller } = agent;
 
-  const { fetchData, fetchAvailableAgents } = useAgentsStore();
-
-  const { endCall } = useQueueCallsStore();
+  const { endCall, deleteAgent, fetchAgentsData } = useBoundStore();
 
   const { showToastMessage } = useToast();
 
@@ -23,12 +20,25 @@ const Agent = ({ agent }) => {
 
     try {
       response = await endCall(activeCall._id);
-      await fetchData();
-      await fetchAvailableAgents();
+      await fetchAgentsData();
       showToastMessage(response.message, "success");
     } catch (err) {
-      console.err(err);
+      console.error(err);
       showToastMessage(err.message, "error");
+    }
+  };
+
+  const handleClickDeleteAgent = async (agentId) => {
+    let response = null;
+    
+    if (window.confirm("Are you sure you want to delete this agent?")) {
+      try {
+        response = await deleteAgent(agentId);
+        showToastMessage(response.message, "success");
+      } catch (err) {
+        console.error(err);
+        showToastMessage(err.message, "error");
+      }
     }
   };
 
@@ -37,35 +47,39 @@ const Agent = ({ agent }) => {
       direction="horizontal"
       className={`${
         availableForCall ? "bg-green-400" : "bg-red-200"
-      }  p-1 text-center flex justify-center items-center`}
+      }  px-2 py-1 text-center flex justify-center items-center`}
     >
-      <span className="mr-2">
-        {!availableForCall ? (
-          <FontAwesomeIcon icon={faX} color="red" />
-        ) : (
-          <FontAwesomeIcon icon={faCheck} color="green" />
-        )}
-      </span>
-
-      <div>
-        {name}{" "}
+      <Stack direction="horizontal" className="flex items-center">
+        <p className="m-0">{name}</p>
         {availableForCall ? (
-          <Badge bg="success">Avail</Badge>
+          <Stack direction="horizontal" className="flex justify-between">
+            <Badge bg="primary" className="ml-2">
+              Avail
+            </Badge>
+          </Stack>
         ) : (
           <span>
             <FontAwesomeIcon icon={faArrowRight} /> {currentCaller?.name} /{" "}
             {currentCaller?.phoneNumber}
           </span>
         )}
-      </div>
+      </Stack>
 
       <div className="ms-auto flex gap-1">
-        {!availableForCall && (
+        {!availableForCall ? (
           <CustomButton
             title="End Call"
             func={handleEndCallClick}
             variant="danger"
           />
+        ) : (
+          <Button
+            className="ms-auto"
+            variant="danger"
+            onClick={() => handleClickDeleteAgent(id)}
+          >
+            <FontAwesomeIcon icon={faTrashCan} color="white" size="sm" />
+          </Button>
         )}
       </div>
     </Stack>
@@ -74,13 +88,13 @@ const Agent = ({ agent }) => {
 
 Agent.propTypes = {
   agent: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
     activeCall: PropTypes.object,
     availableForCall: PropTypes.bool.isRequired,
     currentCaller: PropTypes.object,
   }).isRequired,
-  fetchData: PropTypes.func.isRequired,
 };
 
 export default Agent;

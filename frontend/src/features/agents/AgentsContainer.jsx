@@ -1,12 +1,11 @@
 import { Card, ListGroup } from "react-bootstrap";
 import Agent from "./Agent";
 
-import useAgentsStore from "../../stores/agentStore";
 import LoadingSpinner from "../../components/screens/Spinners";
+import { useBoundStore } from "../../stores/useBoundStore";
 
 const AgentsContainer = () => {
-  const { data: agents, isLoading, error, fetchData } = useAgentsStore();
-  
+  const { agents, isLoading, error } = useBoundStore();
   if (isLoading) {
     return (
       <Card>
@@ -33,7 +32,6 @@ const AgentsContainer = () => {
     );
   }
 
-
   return (
     <Card className="p-0">
       <Card.Header className="text-center font-bold">Agents</Card.Header>
@@ -41,7 +39,7 @@ const AgentsContainer = () => {
         {agents &&
           agents.map((agent) => (
             <ListGroup.Item className="p-0" key={agent._id}>
-              <Agent agent={agent} fetchData={fetchData} />
+              <Agent agent={agent} />
             </ListGroup.Item>
           ))}
       </ListGroup>

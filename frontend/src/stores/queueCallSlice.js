@@ -35,27 +35,6 @@ export const createQueueCallsSlice = (set, get) => ({
         `/api/v1/queue/${queueCallId}/activateQueueCall?agentId=${agentId}`
       );
 
-      // const updatedAgents =
-      //   response &&
-      //   get().agents?.map((agent) => {
-      //     if (agent?._id === agentId) {
-      //       return { ...agent, ...response?.data?.agent };
-      //     }
-      //     return agent;
-      //   });
-      // const updatedQueue =
-      //   response &&
-      //   get().allQueueCalls?.map((queue) => {
-      //     if (queue?._id === queueCallId) {
-      //       return { ...queue, ...response?.data?.queue };
-      //     }
-      //     return queue;
-      //   });
-
-      // set({ agents: updatedAgents, isLoading: false, error: null });
-
-      // set({ allQueueCalls: updatedQueue, isLoading: false, error: null });
-
       return response.data;
     } catch (err) {
       set({ error: err.message, isLoading: false });

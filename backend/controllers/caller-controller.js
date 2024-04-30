@@ -49,8 +49,6 @@ export const createCaller = asyncHandler(async (req, res) => {
     name,
     phoneNumber,
   });
-  console.log("🚀 ~ createCaller ~ caller:", caller);
-
   if (!caller) {
     res.status(400);
     throw new Error(CONSTANTS.ERRORS.CRUD.CALLER.FAILED_CREATE);
@@ -116,8 +114,6 @@ export const updateCaller = asyncHandler(async (req, res) => {
 // @access Private
 export const deleteCaller = asyncHandler(async (req, res) => {
   const { callerId } = req.params;
-  console.log("🚀 ~ deleteCaller ~ callerId:", callerId);
-
   if (!callerId) {
     res.status(400);
     throw new Error("Please provide caller id");

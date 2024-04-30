@@ -39,7 +39,7 @@
       "QUEUE_CALLS_ASSIGNED_OK": "Call successfully assigned to an agent"
     },
     "CALLER_AND_QUEUE_CALL": {
-      "CALLER_AND_QUEUE_CALL_CREATED": "Caller and queue call created successfully",
+      "CALLER_AND_QUEUE_CALL_CREATED": "New caller entered the queue",
       "CALLER_AND_QUEUE_CALL_RETRIEVED": "Caller and queue call retrieved successfully",
       "CALLER_AND_QUEUE_CALL_DELETED": "Caller and queue call deleted successfully",
       "CALLER_AND_QUEUE_CALL_UPDATED": "Caller and queue call updated successfully"

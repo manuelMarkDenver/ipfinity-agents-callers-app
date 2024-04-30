@@ -1,4 +1,4 @@
-import { Card, ListGroup } from "react-bootstrap";
+import { Card, ListGroup, Table } from "react-bootstrap";
 import Agent from "./Agent";
 
 import LoadingSpinner from "../../components/screens/Spinners";
@@ -35,14 +35,24 @@ const AgentsContainer = () => {
   return (
     <Card className="p-0">
       <Card.Header className="text-center font-bold">Agents</Card.Header>
-      <ListGroup variant="flush">
-        {agents &&
-          agents.map((agent) => (
-            <ListGroup.Item className="p-0" key={agent._id}>
-              <Agent agent={agent} />
-            </ListGroup.Item>
-          ))}
-      </ListGroup>
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr className='text-center'>
+            <th>Status</th>
+            <th>Agent ID</th>
+            <th>Name</th>
+            <th>Caller Name</th>
+            <th>Caller Phone Number</th>
+            <th>Handling Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {agents &&
+            Array.isArray(agents) &&
+            agents.map((agent) => <Agent agent={agent} key={agent._id} />)}
+        </tbody>
+      </Table>
     </Card>
   );
 };

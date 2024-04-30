@@ -214,8 +214,6 @@ export const activateQueueCall = asyncHandler(async (req, res) => {
   const { queueCallId } = req.params;
   const { agentId } = req.query;
   const agent = await AgentModel.findById(agentId);
-  console.log("🚀 ~ activateQueueCall ~ agent:", agent);
-
   const queueCall = await QueueCallsModel.findOne({
     _id: queueCallId,
     inQueue: true,
@@ -265,7 +263,6 @@ export const activateQueueCall = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-
   if (!updatedAgent) {
     res.status(400);
     throw new Error(CONSTANTS.ERRORS.CRUD.AGENT.FAILED_UPDATE);

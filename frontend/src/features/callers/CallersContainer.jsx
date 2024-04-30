@@ -1,4 +1,4 @@
-import { Card, ListGroup } from "react-bootstrap";
+import { Card, ListGroup, Table } from "react-bootstrap";
 import Caller from "./Caller";
 import LoadingSpinner from "../../components/screens/Spinners";
 import { useBoundStore } from "../../stores/useBoundStore";
@@ -37,14 +37,22 @@ const CallersContainer = () => {
   return (
     <Card className="p-0">
       <Card.Header className="text-center font-bold">Queue</Card.Header>
-      <ListGroup variant="flush">
-        {filteredQueue &&
-          filteredQueue.map((queue, index) => (
-            <ListGroup.Item className="p-0" key={index}>
-              <Caller caller={queue} />
-            </ListGroup.Item>
-          ))}
-      </ListGroup>
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr className="text-center">
+            <th>Call ID</th>
+            <th>Name</th>
+            <th>Number</th>
+            <th>Time in Queue</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredQueue &&
+            Array.isArray(filteredQueue) &&
+            filteredQueue.map((call) => <Caller call={call} key={call?._id} />)}
+        </tbody>
+      </Table>
     </Card>
   );
 };
